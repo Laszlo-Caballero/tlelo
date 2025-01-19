@@ -4,6 +4,9 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
 import { ImagesService } from './images/images.service';
 import { ImagesModule } from './images/images.module';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
+import { AppController } from './app.controller';
 @Module({
   imports: [
     ConfigModule.forRoot(),
@@ -16,10 +19,14 @@ import { ImagesModule } from './images/images.module';
       database: process.env.DATABASE_MYSQL,
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
     }),
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'uploads'),
+      serveRoot: '/uploads',
+    }),
     AuthModule,
     ImagesModule,
   ],
-  controllers: [],
+  controllers: [AppController],
   providers: [],
 })
 export class AppModule {}
