@@ -7,3 +7,5 @@ export interface ReturnBody<T> {
 export interface ReturnUserBody<T> extends ReturnBody<T> {
   token: string;
 }
+
+export type UserJwt = { email: string; password: string; iat: number };

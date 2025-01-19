@@ -5,16 +5,19 @@ import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './entity/user.entity';
 import { JwtModule } from '@nestjs/jwt';
+import { JwtStrategy } from './jwt.strategy';
+import { ImageUsers } from 'src/Images/entity/image.entity';
+import { ImagesService } from 'src/images/images.service';
 
 @Module({
   imports: [
     ConfigModule.forRoot(),
-    TypeOrmModule.forFeature([User]),
+    TypeOrmModule.forFeature([User, ImageUsers]),
     JwtModule.register({
       secret: process.env.JWT_SECRET,
     }),
   ],
-  providers: [AuthService],
+  providers: [AuthService, JwtStrategy, ImagesService],
   controllers: [AuthController],
 })
 export class AuthModule {}

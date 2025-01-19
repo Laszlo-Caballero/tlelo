@@ -1,8 +1,19 @@
-import { Body, Controller, Param, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Param,
+  Post,
+  Req,
+  UploadedFile,
+  UseGuards,
+  UseInterceptors,
+} from '@nestjs/common';
 import { UserDto } from './dtos/user.dto';
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { UserLoginDto } from './dtos/userLogin.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
 
 @Controller('auth')
 export class AuthController {
@@ -19,9 +30,24 @@ export class AuthController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Post('uploadImage/:id')
-  uploadImage(@Param('id') id: string) {
-    return 'this upload image';
-    // return this.authService.uploadImage(user);
+  @Post('uploadImage/:username')
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: diskStorage({
+        destination: './uploads',
+        filename: (req, file, cb) => {
+          const ext = file.originalname.split('.').pop();
+          const filename = `file-${Date.now()}.${ext}`;
+          cb(null, filename);
+        },
+      }),
+    }),
+  )
+  uploadImage(
+    @Param('username') id: string,
+    @UploadedFile() file: Express.Multer.File,
+    @Req() req: any,
+  ) {
+    return this.authService.uploadImage(id, req.user, file);
   }
 }

@@ -3,16 +3,19 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entity/user.entity';
 import { Repository } from 'typeorm';
 import { UserDto } from './dtos/user.dto';
-import { ReturnUserBody } from 'src/types/types';
+import { ReturnBody, ReturnUserBody, UserJwt } from 'src/types/types';
 import { compare, hash } from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { UserLoginDto } from './dtos/userLogin.dto';
+import { ImagesService } from 'src/images/images.service';
+import { ImageUsers } from 'src/Images/entity/image.entity';
 
 @Injectable()
 export class AuthService {
   constructor(
     @InjectRepository(User) private userRepository: Repository<User>,
     private jwtService: JwtService,
+    private ImageUserService: ImagesService,
   ) {}
 
   async register(userDto: UserDto): Promise<ReturnUserBody<Partial<User>>> {
@@ -55,7 +58,7 @@ export class AuthService {
       password: passwordHash,
     });
 
-    const payload = { password: newUser.password, email: newUser.email };
+    const payload = { password, email: newUser.email };
 
     const token = await this.jwtService.sign(payload);
 
@@ -98,7 +101,7 @@ export class AuthService {
         token: '',
       };
     }
-    const payload = { password: findUser.password, email: findUser.email };
+    const payload = { password, email: findUser.email };
 
     const token = await this.jwtService.sign(payload);
 
@@ -107,6 +110,52 @@ export class AuthService {
       message: 'Login success',
       data: findUser,
       token,
+    };
+  }
+
+  async uploadImage(
+    userName: string,
+    user: UserJwt,
+    file: Express.Multer.File,
+  ): Promise<ReturnBody<ImageUsers>> {
+    const findUser = await this.userRepository.findOne({
+      where: {
+        username: userName,
+      },
+    });
+
+    if (!findUser) {
+      return {
+        status: 400,
+        message: 'User not found',
+        data: null,
+      };
+    }
+
+    if (findUser.email !== user.email) {
+      return {
+        status: 400,
+        message: 'Unauthorized',
+        data: null,
+      };
+    }
+
+    const isPassword = await compare(user.password, findUser.password);
+
+    if (!isPassword) {
+      return {
+        status: 400,
+        message: 'Invalid credentials',
+        data: null,
+      };
+    }
+
+    const image = await this.ImageUserService.createImage(file, findUser);
+
+    return {
+      status: 200,
+      message: 'Image uploaded',
+      data: image,
     };
   }
 }

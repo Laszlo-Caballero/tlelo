@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
 import { ImagesService } from './images/images.service';
+import { ImagesModule } from './images/images.module';
 @Module({
   imports: [
     ConfigModule.forRoot(),
@@ -16,8 +17,9 @@ import { ImagesService } from './images/images.service';
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
     }),
     AuthModule,
+    ImagesModule,
   ],
   controllers: [],
-  providers: [ImagesService],
+  providers: [],
 })
 export class AppModule {}
