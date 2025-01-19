@@ -19,6 +19,10 @@ export class ImagesService {
       const fileName = await this.convertToWebp(filePath);
 
       await this.imageRepository.update(user.image.id, { name: fileName });
+
+      await promises.unlink(
+        `${image.destination}/${user.image.name.split('/').pop()}`,
+      );
       user.image.name = fileName;
       return user;
     }
