@@ -11,15 +11,8 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  async validate(payload: {
-    id: number;
-    name: string;
-    type: string;
-    iat: number;
-  }) {
-    if (payload.type != 'admin') {
-      throw new HttpException('No autorizado', HttpStatus.UNAUTHORIZED);
-    }
+  async validate(payload) {
+    console.log(payload);
 
     return payload;
   }

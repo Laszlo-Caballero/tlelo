@@ -6,6 +6,7 @@ import { UserDto } from './dtos/user.dto';
 import { ReturnUserBody } from 'src/types/types';
 import { compare, hash } from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
+import { UserLoginDto } from './dtos/userLogin.dto';
 
 @Injectable()
 export class AuthService {
@@ -15,18 +16,33 @@ export class AuthService {
   ) {}
 
   async register(userDto: UserDto): Promise<ReturnUserBody<Partial<User>>> {
-    const { email, password } = userDto;
+    const { email, password, username } = userDto;
 
-    const findUser = await this.userRepository.findOne({
+    const findUserEmail = await this.userRepository.findOne({
       where: {
         email,
       },
     });
 
-    if (findUser) {
+    if (findUserEmail) {
       return {
         status: 400,
         message: 'User already exists',
+        data: null,
+        token: '',
+      };
+    }
+
+    const findUserUsername = await this.userRepository.findOne({
+      where: {
+        username,
+      },
+    });
+
+    if (findUserUsername) {
+      return {
+        status: 400,
+        message: 'Username already exists',
         data: null,
         token: '',
       };
@@ -53,7 +69,7 @@ export class AuthService {
     };
   }
 
-  async login(userDto: UserDto): Promise<ReturnUserBody<Partial<User>>> {
+  async login(userDto: UserLoginDto): Promise<ReturnUserBody<Partial<User>>> {
     const { email, password } = userDto;
 
     const findUser = await this.userRepository.findOne({
