@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entity/user.entity';
-import { Repository } from 'typeorm';
+import { Repository, UpdateResult } from 'typeorm';
 import { UserDto } from './dtos/user.dto';
 import { ReturnBody, ReturnUserBody, UserJwt } from 'src/types/types';
 import { compare, hash } from 'bcrypt';
@@ -117,11 +117,12 @@ export class AuthService {
     userName: string,
     user: UserJwt,
     file: Express.Multer.File,
-  ): Promise<ReturnBody<ImageUsers>> {
+  ): Promise<ReturnBody<ImageUsers | User>> {
     const findUser = await this.userRepository.findOne({
       where: {
         username: userName,
       },
+      relations: ['image'],
     });
 
     if (!findUser) {

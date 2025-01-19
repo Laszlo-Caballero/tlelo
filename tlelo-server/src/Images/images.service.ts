@@ -14,6 +14,15 @@ export class ImagesService {
   ) {}
 
   async createImage(image: Express.Multer.File, user: User) {
+    if (user.image != null) {
+      const filePath = `${image.destination}/${image.filename}`;
+      const fileName = await this.convertToWebp(filePath);
+
+      await this.imageRepository.update(user.image.id, { name: fileName });
+      user.image.name = fileName;
+      return user;
+    }
+
     const filePath = `${image.destination}/${image.filename}`;
     const fileName = await this.convertToWebp(filePath);
 
