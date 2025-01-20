@@ -2,6 +2,7 @@ import { Route, Routes } from "react-router";
 import Login from "../../pages/auth/Login";
 import { Box } from "componentsla";
 import BgLogin from "@/assets/images/bglogin.png";
+import Register from "@/pages/auth/Register";
 
 export default function AuthRoute() {
   return (
@@ -23,7 +24,7 @@ export default function AuthRoute() {
       />
       <Routes>
         <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<h1>register</h1>} />
+        <Route path="/register" element={<Register />} />
       </Routes>
     </Box>
   );
