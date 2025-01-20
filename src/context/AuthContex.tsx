@@ -4,6 +4,7 @@ import Cookie from "js-cookie";
 import axios from "axios";
 import { Toast } from "componentsla";
 import { apiUrl } from "@/config/apiUrl";
+import { authConfig } from "@/config/config";
 
 type Login = {
   email: string;
@@ -22,12 +23,6 @@ type AuthContextType = {
   login: (login: Login) => void;
   register: (register: Register) => void;
   logout: () => void;
-};
-
-const authConfig = {
-  tokenCookie: "authToken",
-  tokenStorage: "authStorage",
-  userStorage: "user",
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
