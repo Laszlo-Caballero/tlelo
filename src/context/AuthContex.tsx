@@ -1,7 +1,9 @@
 import { AuthResponse, User } from "@/interfaces/types";
-import { createContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import Cookie from "js-cookie";
 import axios from "axios";
+import { Toast } from "componentsla";
+import { apiUrl } from "@/config/apiUrl";
 
 type Login = {
   email: string;
@@ -16,7 +18,8 @@ type Register = {
 type AuthContextType = {
   user?: User;
   token?: string;
-  login: (login: Login) => Promise<AuthResponse>;
+  isAuth: boolean;
+  login: (login: Login) => void;
   register: (register: Register) => void;
   logout: () => void;
 };
@@ -27,13 +30,15 @@ const authConfig = {
   userStorage: "user",
 };
 
-export const AuthContext = createContext<AuthContextType | undefined>(
-  undefined
-);
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const toast = Toast();
   const [token, setToken] = useState("");
   const [user, setUser] = useState<User>();
+  const [isAuth, setIsAuth] = useState(false);
+
+  const url = apiUrl.back;
 
   useEffect(() => {
     const token =
@@ -50,13 +55,55 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const login = async (login: Login) => {
-    const responsive = await axios.post<AuthResponse>("/auth/login", login);
-    return responsive.data;
+    try {
+      const responsive = await axios.post<AuthResponse>(
+        `${url}/auth/login`,
+        login
+      );
+
+      if (responsive.data.status !== 200) {
+        throw new Error(responsive.data.message);
+      }
+
+      setToken(responsive.data.token);
+      setUser(responsive.data.data);
+      setIsAuth(true);
+      localStorage.setItem(authConfig.tokenStorage, responsive.data.token);
+      localStorage.setItem(
+        authConfig.userStorage,
+        JSON.stringify(responsive.data.data)
+      );
+      Cookie.set(authConfig.tokenCookie, responsive.data.token);
+      toast.success("Bienvenido");
+    } catch (error) {
+      console.log(error);
+      toast.error("Error al iniciar sesión");
+    }
   };
 
   const register = async (register: Register) => {
-    const responsive = await axios.post("/auth/register", register);
-    return responsive.data;
+    try {
+      const responsive = await axios.post(`${url}/auth/register`, register);
+      const data = responsive.data;
+
+      if (data.status !== 200) {
+        throw new Error(data.message);
+      }
+      setToken(data.token);
+      setUser(data.data);
+      setIsAuth(true);
+
+      localStorage.setItem(authConfig.tokenStorage, responsive.data.token);
+      localStorage.setItem(
+        authConfig.userStorage,
+        JSON.stringify(responsive.data.data)
+      );
+      Cookie.set(authConfig.tokenCookie, responsive.data.token);
+      toast.success("Registrado correctamente");
+    } catch (error) {
+      console.log(error);
+      toast.error("Error al registrarse");
+    }
   };
 
   const logout = () => {
@@ -68,8 +115,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, login, register, logout }}>
+    <AuthContext.Provider
+      value={{ user, token, isAuth, login, register, logout }}
+    >
       {children}
     </AuthContext.Provider>
   );
 }
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error("useAuth must be used within an AuthProvider");
+  }
+  return context;
+};
