@@ -61,20 +61,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         login
       );
 
-      if (responsive.data.status !== 200) {
-        throw new Error(responsive.data.message);
+      const data = responsive.data;
+
+      if (data.status !== 200) {
+        throw new Error(data.message);
       }
 
-      setToken(responsive.data.token);
-      setUser(responsive.data.data);
+      setToken(data.token);
+      setUser(data.data);
       setIsAuth(true);
-      localStorage.setItem(authConfig.tokenStorage, responsive.data.token);
-      localStorage.setItem(
-        authConfig.userStorage,
-        JSON.stringify(responsive.data.data)
-      );
-      Cookie.set(authConfig.tokenCookie, responsive.data.token);
-      toast.success("Bienvenido");
+      localStorage.setItem(authConfig.tokenStorage, data.token);
+      localStorage.setItem(authConfig.userStorage, JSON.stringify(data.data));
+      Cookie.set(authConfig.tokenCookie, data.token);
+      toast.success(`Bienvenido ${data.data.username}`);
     } catch (error) {
       console.log(error);
       toast.error("Error al iniciar sesión");
@@ -93,12 +92,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(data.data);
       setIsAuth(true);
 
-      localStorage.setItem(authConfig.tokenStorage, responsive.data.token);
-      localStorage.setItem(
-        authConfig.userStorage,
-        JSON.stringify(responsive.data.data)
-      );
-      Cookie.set(authConfig.tokenCookie, responsive.data.token);
+      localStorage.setItem(authConfig.tokenStorage, data.token);
+      localStorage.setItem(authConfig.userStorage, JSON.stringify(data.data));
+      Cookie.set(authConfig.tokenCookie, data.token);
       toast.success("Registrado correctamente");
     } catch (error) {
       console.log(error);

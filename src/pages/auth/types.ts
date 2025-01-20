@@ -4,7 +4,7 @@ export interface RegisterType {
   password: string;
 }
 
-export interface LoginSchema {
+export interface LoginType {
   email: string;
   password: string;
 }
