@@ -8,11 +8,12 @@ import { JwtModule } from '@nestjs/jwt';
 import { JwtStrategy } from './jwt.strategy';
 import { ImageUsers } from 'src/Images/entity/image.entity';
 import { ImagesService } from 'src/images/images.service';
+import { Tableros } from 'src/Tableros/entity/tablero.entity';
 
 @Module({
   imports: [
     ConfigModule.forRoot(),
-    TypeOrmModule.forFeature([User, ImageUsers]),
+    TypeOrmModule.forFeature([User, ImageUsers, Tableros]),
     JwtModule.register({
       secret: process.env.JWT_SECRET,
     }),

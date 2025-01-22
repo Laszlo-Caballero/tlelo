@@ -39,19 +39,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const url = apiUrl.back;
 
   useEffect(() => {
-    const token =
-      localStorage.getItem(authConfig.tokenStorage) ||
-      Cookie.get(authConfig.tokenCookie) ||
-      "";
     const user = localStorage.getItem(authConfig.userStorage) ?? "";
 
-    console.log(token, user);
-
-    if (!isEmpty(token) && !isEmpty(user)) {
-      setUser(JSON.parse(user));
-      setToken(token);
-      setIsAuth(true);
+    if (isEmpty(user)) {
+      return;
     }
+    const parse: User = JSON.parse(user);
+
+    login({
+      email: parse.email,
+      password: parse.password,
+    });
   }, []);
 
   const login = async (login: Login) => {
@@ -71,12 +69,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(data.data);
       setIsAuth(true);
       localStorage.setItem(authConfig.tokenStorage, data.token);
-      localStorage.setItem(authConfig.userStorage, JSON.stringify(data.data));
+      localStorage.setItem(
+        authConfig.userStorage,
+        JSON.stringify({
+          ...data.data,
+          password: login.password,
+        })
+      );
       Cookie.set(authConfig.tokenCookie, data.token);
       toast.success(`Bienvenido ${data.data.username}`);
       navigate("/");
     } catch (error) {
       console.log(error);
+
+      localStorage.removeItem(authConfig.tokenStorage);
+      localStorage.removeItem(authConfig.userStorage);
+      Cookie.remove(authConfig.tokenCookie);
+      navigate("/auth/login");
       toast.error("Error al iniciar sesión");
     }
   };

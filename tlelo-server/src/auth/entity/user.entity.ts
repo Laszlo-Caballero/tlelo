@@ -1,7 +1,14 @@
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  OneToOne,
+  OneToMany,
+} from 'typeorm';
 import { ImageUsers } from 'src/Images/entity/image.entity';
-import { Column, Entity, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { UserTable } from 'src/Tableros/entity/userTable.entity';
 
-@Entity()
+@Entity('user')
 export class User {
   @PrimaryGeneratedColumn()
   id: number;
@@ -14,6 +21,10 @@ export class User {
 
   @Column()
   password: string;
+
   @OneToOne(() => ImageUsers, (image) => image.user)
   image: ImageUsers;
+
+  @OneToMany(() => UserTable, (userTable) => userTable.user)
+  userTable: UserTable[];
 }
